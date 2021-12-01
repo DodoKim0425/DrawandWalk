@@ -32,8 +32,9 @@
     </LinearLayout>
 
     <TextView
+        android:paddingTop="10dp"
         android:layout_width="wrap_content"
-        android:layout_height="63dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="그림 주제: 공룡"
         android:backgroundTint="#77D54A"
@@ -42,20 +43,20 @@
 
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="63dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:backgroundTint="#77D54A"
         android:text="제한시간: 10분"
         android:textSize="30dp"
-        android:id="@+id/tvLimit"/>
+        android:id="@+id/tvTimeLimit"/>
     <Chronometer
         android:layout_width="wrap_content"
-        android:layout_height="63dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:backgroundTint="#77D54A"
         android:text="산책 시간:%s"
         android:textSize="30dp"
-        android:id="@+id/chronoTime"/>
+        android:id="@+id/chronometer"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
