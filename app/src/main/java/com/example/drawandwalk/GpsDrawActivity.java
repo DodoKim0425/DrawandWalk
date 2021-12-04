@@ -1,11 +1,12 @@
 package com.example.drawandwalk;
 
 import android.Manifest;
-import android.app.ProgressDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -15,43 +16,48 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
+import android.os.Environment;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.provider.Settings;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Chronometer;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
+import net.daum.mf.map.api.CameraUpdateFactory;
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
+import net.daum.mf.map.api.MapPointBounds;
 import net.daum.mf.map.api.MapPolyline;
 import net.daum.mf.map.api.MapView;
 
-import java.net.NetworkInterface;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.Date;
 
 public class GpsDrawActivity extends AppCompatActivity {
     private RelativeLayout mapViewContainer;
-    private TextView tvTopic, tvTimeLimit;
+    private TextView tvTopic, tvTimeLimit,tvEndDraw;
     private MapView mapView;
     private MapPOIItem marker = new MapPOIItem();
     private Button btnDrawStart, btnDrawEnd,btnSave;
@@ -63,12 +69,16 @@ public class GpsDrawActivity extends AppCompatActivity {
     private MapPoint point;
     private MapPolyline polyline = new MapPolyline();
     private LocationListener locationListener;
+    private LinearLayout linearDraw;
     private ConnectivityManager connectivityManager;
+    private ArrayList<DrawLocation> locations;
+    private boolean started=false;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.gpsdraw_activity);
         Intent GPSIntent = getIntent();
         permissonCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         c_permissonCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -80,13 +90,16 @@ public class GpsDrawActivity extends AppCompatActivity {
         marker.setItemName("당신의 위치");
         marker.setTag(0);
         marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
-        mapView.addPOIItem(marker);
-        manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        //mapView.addPOIItem(marker);//마커를 지도위에 올린다
+        manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         btnDrawStart = findViewById(R.id.btnDrawStart);
         tvTopic = findViewById(R.id.tvTopic);
         tvTimeLimit = findViewById(R.id.tvTimeLimit);
         btnSave = findViewById(R.id.btnSave);
         chronometer=findViewById(R.id.chronometer);
+        linearDraw=findViewById(R.id.linearDrawing);
+        tvEndDraw=findViewById(R.id.tvEndDraw);
+        locations=new ArrayList<DrawLocation>();
 
         Boolean timeLimit = GPSIntent.getBooleanExtra("timeLimit", false);
         tvTopic.setText("그림 주제: " + GPSIntent.getStringExtra("topic"));
@@ -95,22 +108,26 @@ public class GpsDrawActivity extends AppCompatActivity {
         } else {
             tvTimeLimit.setText("제한시간: " + GPSIntent.getIntExtra("hour", 0) + "시간" + GPSIntent.getIntExtra("min", 0) + "분");
         }
-        ArrayList<MapPoint> pointList = new ArrayList<MapPoint>();
-        polyline.setLineColor(Color.argb(0, 255, 51, 0));
+
+        //polyline.setLineColor(Color.argb(0, 255, 51, 0));
         if (permissonCheck != PackageManager.PERMISSION_GRANTED && c_permissonCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
         } else {
         }
-        locationListener = new LocationListener() {
+        locationListener = new LocationListener() {//사용자 이동 감지 리스너
             @Override
             public void onLocationChanged(@NonNull Location location) {
                 latitude = location.getLatitude();
                 longitude = location.getLongitude();
-                point = MapPoint.mapPointWithGeoCoord(latitude, longitude);
-                marker.setMapPoint(point);
-                mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), true);
-                polyline.addPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude));
-                mapView.addPolyline(polyline);
+                point = MapPoint.mapPointWithGeoCoord(latitude, longitude);//지도 위의 한 위치
+                marker.setMapPoint(point);//해당 위치로 마커 설정, 사용자 위치 알림
+                mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude), true);//사용자 현 위치로 중앙을 설정
+
+                if(started==true){//그림그리기 시작된 경우에만 지도와 저장 파일에 점을 추가한다.
+                    polyline.addPoint(MapPoint.mapPointWithGeoCoord(latitude, longitude));//사용자 위치 추가
+                    mapView.addPolyline(polyline);
+                    locations.add(new DrawLocation(latitude,longitude));
+                }
             }
 
             @Override
@@ -135,16 +152,18 @@ public class GpsDrawActivity extends AppCompatActivity {
                 showToast("네트워크 연결이 없어 앱을 사용할 수 없습니다.");
                 finish();
             }else{
-                showToast("뭐야");
             }
         }
+        showToast("GPS 위치 파악이 정확해질 때까지 시작하지 말고 기다려주세요..");
 
+        if(manager.isProviderEnabled(manager.GPS_PROVIDER)==true){//gps사용 가능한 경우
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, locationListener);
+        }else{//아닌경우 네트워크로 위치 파악
+            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, locationListener);
+        }
 
-        manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 1, locationListener);
-
-        lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        if (lastLocation == null) {//gps가 잡히지 않는 경우
-            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 100, 1, locationListener);
+        lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);//gps로 위치 잡는것을 우선시한다
+        if (lastLocation == null) {//앱 설치 후 최초 실행시 gps가 잡히지 않는 경우
             lastLocation = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
             if (lastLocation == null) {
                 showToast("인터넷 연결이 없거나 GPS정보를 알 수 없는 위치입니다.");
@@ -153,11 +172,11 @@ public class GpsDrawActivity extends AppCompatActivity {
                 GPSServiceStart();
             }
 
-        } else {//gps로 위치 파익이 되는 경우
+        } else {//마지막 GPS위치 파악이 가능한 경우
             GPSServiceStart();
         }
     }
-    private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {
+    private ConnectivityManager.NetworkCallback networkCallback = new ConnectivityManager.NetworkCallback() {//네트워크 연결 확인
         @Override public void onAvailable(Network network) {
             super.onAvailable(network);
             Log.e("onAvailable", "WI-FI 연결됨");
@@ -165,6 +184,8 @@ public class GpsDrawActivity extends AppCompatActivity {
         @Override public void onLost(Network network) {
             super.onLost(network);
             Log.e("onAvailable", "WI-FI 연결 끊김");
+            showToast("네트워크 연결이 없어 앱을 사용할 수 없습니다.");
+            finish();
         }
     };
 
@@ -182,39 +203,94 @@ public class GpsDrawActivity extends AppCompatActivity {
         mapViewContainer.removeView(mapView);
         super.finish();
     }
-    public void showToast(String message){
+    public void showToast(String message){//토스트 메시지 메서드
         Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
     }
-    public void GPSServiceStart(){
-        longitude=lastLocation.getLongitude();
-        latitude=lastLocation.getLatitude();//처음 위치 세팅
-        point=MapPoint.mapPointWithGeoCoord(latitude,longitude);//포인트
-        marker.setMapPoint(point);
-        mapView.addPOIItem(marker);//사용자 위치 표시하는 마커
-        //polyline.addPoint(MapPoint.mapPointWithGeoCoord(latitude,longitude));
-        //mapView.addPolyline(polyline);
-        mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude,longitude),true);//맵 중앙에 사용자 위치가 오도록
-        btnDrawStart.setOnClickListener(new View.OnClickListener() {
+    public void GPSServiceStart(){//그림그리기위한 세팅 완료 이후
+            longitude=lastLocation.getLongitude();
+            latitude=lastLocation.getLatitude();//처음 위치 세팅
+            point=MapPoint.mapPointWithGeoCoord(latitude,longitude);//포인트
+            marker.setMapPoint(point);
+            mapView.addPOIItem(marker);//사용자 위치 표시하는 마커
+           mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude,longitude),true);//맵 중앙에 사용자 위치가 오도록
+        btnDrawStart.setOnClickListener(new View.OnClickListener() {//시작 버튼 클릭
             @Override
             public void onClick(View v) {
+                started=true;
+                btnDrawEnd.setVisibility(View.VISIBLE);
+                btnDrawStart.setVisibility(View.GONE);
                 polyline.setLineColor(Color.argb(128,255,51,0));
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 chronometer.start();
             }
         });
-        btnDrawEnd.setOnClickListener(new View.OnClickListener() {
+        btnDrawEnd.setOnClickListener(new View.OnClickListener() {//그림그리기 종료
             @Override
             public void onClick(View v) {
-                polyline.setLineColor(Color.argb(0,255,51,0));
+                started=false;
+                btnSave.setVisibility(View.VISIBLE);
+                btnDrawEnd.setVisibility(View.GONE);
                 chronometer.stop();
+                manager.removeUpdates(locationListener);//리스너 제거, 제거하지 않으면 배터리 소모 문제있음
+            }
+        });
+        btnSave.setOnClickListener(new View.OnClickListener() {//저장 버튼 클릭시
+            @Override
+            public void onClick(View v) {
+                MapPointBounds mapPointBounds = new MapPointBounds(polyline.getMapPoints());
+                int padding = 100; // px
+                mapView.moveCamera(CameraUpdateFactory.newMapPointBounds(mapPointBounds, padding));//그림전체가 보이게 이동
+
+                long mNow=System.currentTimeMillis();//현재 시각
+                Date mDate=new Date(mNow);
+                SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss");
+                String nowTime=simpleDateFormat.format(mDate);
+
+                String filename="DrawAndWalk_"+nowTime+".txt";//저장되는 파일명
+
+                saveDrawing(filename);
+
+                btnSave.setVisibility(View.GONE);
+                tvEndDraw.setVisibility(View.VISIBLE);
             }
         });
     }
-
+    public void saveDrawing(String filename){//저장
+        try{
+            String strFolderPath=Environment.getExternalStorageDirectory()+"/DrawAndWalk";
+            File folder=new File(strFolderPath);
+            if(!folder.exists()){//저장할 폴더인 DrawAndWalk가 없는 경우
+                folder.mkdirs();//폴더를 만듦
+            }
+            File file=new File(folder+"/"+filename);
+            if(!file.exists()){
+                file.createNewFile();
+            }
+            FileWriter writer;
+            writer=new FileWriter(file,true);
+            for(int i=0;i<locations.size();i++){
+                writer.write(locations.get(i).getLatitude()+","+locations.get(i).getLongitude()+"\n");
+            }
+            showToast("저장 완료");
+            writer.flush();
+            writer.close();
+        }catch (Exception e){
+            showToast("그림을 저장하지 못했습니다..");
+        }
+    }
     @Override
-    protected void onDestroy() {//https://gooners0304.tistory.com/entry/NetworkCallback%EC%9D%84-%EC%9D%B4%EC%9A%A9%ED%95%98%EC%97%AC-%EB%84%A4%ED%8A%B8%EC%9B%8C%ED%81%AC-%EC%83%81%ED%83%9C%EB%A5%BC-%EB%B0%9B%EC%95%84%EC%98%A4%EC%9E%90
+    protected void onDestroy() {
         connectivityManager.unregisterNetworkCallback(networkCallback);
         chronometer.stop();
         super.onDestroy();
+    }
+
+    @Override
+    public void onBackPressed() {
+        mapViewContainer.removeView(mapView);
+        Intent intent=new Intent(getApplicationContext(),FirstActivity.class);
+        startActivity(intent);
+        finish();
+        super.onBackPressed();
     }
 }

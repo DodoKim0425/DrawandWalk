@@ -19,7 +19,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="그리기 시작"
-            android:backgroundTint="#819876"
+            android:backgroundTint="#77D54A"
             android:id="@+id/btnDrawStart"/>
 
         <Button
@@ -27,9 +27,31 @@
             android:layout_height="wrap_content"
             android:text="그리기 종료"
             android:backgroundTint="#77D54A"
+            android:visibility="gone"
             android:id="@+id/btnDrawEnd"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="작품 저장하기"
+            android:layout_gravity="center"
+            android:backgroundTint="#77D54A"
+            android:visibility="gone"
+            android:id="@+id/btnSave"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="그리기가 종료되었습니다."
+            android:textSize="20dp"
+            android:visibility="gone"
+            android:id="@+id/tvEndDraw"/>
 
     </LinearLayout>
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:id="@+id/linearDrawing"
+    android:background="#C1DABA">
 
     <TextView
         android:paddingTop="10dp"
@@ -57,16 +79,14 @@
         android:text="산책 시간:%s"
         android:textSize="30dp"
         android:id="@+id/chronometer"/>
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="작품 저장하기"
-        android:layout_gravity="center"
-        android:backgroundTint="#77D54A"
-        android:id="@+id/btnSave"/>
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/mapView"/>
+
+
+</LinearLayout>
+
+
 
 </LinearLayout>

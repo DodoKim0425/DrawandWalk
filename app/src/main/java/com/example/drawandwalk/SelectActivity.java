@@ -152,6 +152,7 @@ public class SelectActivity extends AppCompatActivity {
         intent.putExtra("min", min);
         intent.putExtra("timeLimit", timeLimit);
         startActivity(intent);
+        finish();
     }
 
 
