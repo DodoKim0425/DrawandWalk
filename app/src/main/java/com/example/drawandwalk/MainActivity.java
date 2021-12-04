@@ -53,7 +53,9 @@ public class MainActivity extends AppCompatActivity{
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case PERMISSION_REQUEST:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED&&
+                        grantResults[1]==PackageManager.PERMISSION_GRANTED&&
+                        grantResults[2]==PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "권한 설정완료", Toast.LENGTH_SHORT).show();
                     startFirstActivity();
 
