@@ -15,6 +15,7 @@ import android.net.NetworkInfo;
 import android.net.NetworkRequest;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.SystemClock;
 import android.util.Log;
@@ -44,7 +45,7 @@ import java.util.Date;
 
 public class GpsDrawActivity extends AppCompatActivity {
     private RelativeLayout mapViewContainer;
-    private TextView tvTopic, tvTimeLimit,tvEndDraw;
+    private TextView tvTopic, tvTimeLimit,tvEndDraw,tvHourLimit,tvMinLimit,tvSecondLimit;
     private MapView mapView;
     private MapPOIItem marker = new MapPOIItem();
     private Button btnDrawStart, btnDrawEnd,btnSave;
@@ -60,13 +61,13 @@ public class GpsDrawActivity extends AppCompatActivity {
     private ConnectivityManager connectivityManager;
     private ArrayList<DrawLocation> locations;
     private boolean started=false;
-
+    private Intent GPSIntent;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.gpsdraw_activity);
-        Intent GPSIntent = getIntent();
+        GPSIntent = getIntent();
         permissonCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         c_permissonCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         btnDrawStart = findViewById(R.id.btnDrawStart);
@@ -81,6 +82,9 @@ public class GpsDrawActivity extends AppCompatActivity {
         btnDrawStart = findViewById(R.id.btnDrawStart);
         tvTopic = findViewById(R.id.tvTopic);
         tvTimeLimit = findViewById(R.id.tvTimeLimit);
+        tvHourLimit=findViewById(R.id.tvHourLimit);
+        tvMinLimit=findViewById(R.id.tvMinLimit);
+        tvSecondLimit=findViewById(R.id.tvSecondLimit);
         btnSave = findViewById(R.id.btnSave);
         chronometer=findViewById(R.id.chronometer);
         linearDraw=findViewById(R.id.linearDrawing);
@@ -91,8 +95,13 @@ public class GpsDrawActivity extends AppCompatActivity {
         tvTopic.setText("그림 주제: " + GPSIntent.getStringExtra("topic"));
         if (timeLimit == false) {
             tvTimeLimit.setText("제한시간: 없음");
+            tvHourLimit.setVisibility(View.GONE);
+            tvMinLimit.setVisibility(View.GONE);
+            tvSecondLimit.setVisibility(View.GONE);
         } else {
-            tvTimeLimit.setText("제한시간: " + GPSIntent.getIntExtra("hour", 0) + "시간" + GPSIntent.getIntExtra("min", 0) + "분");
+            tvMinLimit.setText(GPSIntent.getIntExtra("min",0)+" 분 ");
+            tvHourLimit.setText(GPSIntent.getIntExtra("hour",0)+ "시간 ");
+            tvSecondLimit.setText("0 초");
         }
 
         if (permissonCheck != PackageManager.PERMISSION_GRANTED && c_permissonCheck != PackageManager.PERMISSION_GRANTED) {
@@ -207,6 +216,9 @@ public class GpsDrawActivity extends AppCompatActivity {
                 polyline.setLineColor(Color.argb(128,255,51,0));
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 chronometer.start();
+                if(GPSIntent.getBooleanExtra("timeLimit",false)==true){
+                    countDown();
+                }
             }
         });
         btnDrawEnd.setOnClickListener(new View.OnClickListener() {//그림그리기 종료
@@ -277,5 +289,30 @@ public class GpsDrawActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
         super.onBackPressed();
+    }
+
+    public void countDown(){
+        long conversionTime=GPSIntent.getIntExtra("hour",0)*1000*60*60+GPSIntent.getIntExtra("min",0)*1000*60;
+        new CountDownTimer(conversionTime,1000){
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                if(started==true){//그림그리기 종료된 이후로는 측정하지 않음
+                    String hour=String.valueOf(millisUntilFinished/(60*60*1000));//hour
+                    long getMin=millisUntilFinished%(60*60*1000);//hour제외 남은시간
+                    String min=String.valueOf(getMin/(60*1000));//남은 시간에서 분 구함
+                    String second=String.valueOf((getMin%(60*1000))/1000);//분 제외 초는 나머지로 구함
+                    tvHourLimit.setText(hour+" 시간 ");
+                    tvMinLimit.setText(min+" 분 ");
+                    tvSecondLimit.setText(second+" 초");
+                }
+            }
+            @Override
+            public void onFinish() {
+                if(started==true){//타이머 끝나기 전에 그림그리기 종료되었으면 알림 보내지 않음
+                    showToast("제한 시간 종료!!");
+                }
+            }
+        }.start();
     }
 }

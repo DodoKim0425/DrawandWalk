@@ -62,21 +62,50 @@
         android:backgroundTint="#77D54A"
         android:textSize="30dp"
         android:id="@+id/tvTopic"/>
-
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:backgroundTint="#77D54A"
-        android:text="제한시간: 10분"
-        android:textSize="30dp"
-        android:id="@+id/tvTimeLimit"/>
+        android:gravity="center">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="#77D54A"
+            android:text="제한시간: "
+            android:textSize="30dp"
+            android:id="@+id/tvTimeLimit"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="#77D54A"
+            android:text="시간"
+            android:textSize="30dp"
+            android:id="@+id/tvHourLimit"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="#77D54A"
+            android:text=" 분"
+            android:textSize="30dp"
+            android:id="@+id/tvMinLimit"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:backgroundTint="#77D54A"
+            android:text=" 초"
+            android:textSize="30dp"
+            android:id="@+id/tvSecondLimit"/>
+    </LinearLayout>
+
     <Chronometer
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:backgroundTint="#77D54A"
-        android:text="산책 시간:%s"
+        android:text="%s"
         android:textSize="30dp"
         android:id="@+id/chronometer"/>
     <RelativeLayout

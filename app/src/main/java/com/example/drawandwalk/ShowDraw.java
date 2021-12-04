@@ -15,7 +15,7 @@ import net.daum.mf.map.api.MapPolyline;
 import net.daum.mf.map.api.MapView;
 import java.util.ArrayList;
 
-public class ShowDraw extends AppCompatActivity {
+public class ShowDraw extends AppCompatActivity {//작품 감상 화면
     private RelativeLayout mapViewContainer;
     private MapView mapView;
     private ArrayList<DrawLocation> myDrawPoints;

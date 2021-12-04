@@ -18,13 +18,7 @@ import android.widget.RadioGroup;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import java.util.ArrayList;
 import java.util.Random;
 
 public class SelectActivity extends AppCompatActivity {
@@ -42,7 +36,6 @@ public class SelectActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select);
-        setTitle("Walk and Draw");
         Random random = new Random();
         rdoGroup = findViewById(R.id.rdoGroup);
         linearRand = findViewById(R.id.linearRand);
