@@ -23,17 +23,18 @@ public class MainActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         setTitle("Walk and Draw");
-        onCheckPermission();
+
         permissionCheck= ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
         c_permissionCheck= ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
         s_permissionCheck=ContextCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if(permissionCheck==PackageManager.PERMISSION_GRANTED&&c_permissionCheck==PackageManager.PERMISSION_GRANTED&&s_permissionCheck==PackageManager.PERMISSION_GRANTED){
-            startSelectActivity();
+        if(permissionCheck==PackageManager.PERMISSION_GRANTED&&c_permissionCheck==PackageManager.PERMISSION_GRANTED&&s_permissionCheck==PackageManager.PERMISSION_GRANTED){//이미 모든 권한 승인 된 경우
+            startFirstActivity();//다음으로
         }
+        onCheckPermission();//권한 확인
     }
     public void onCheckPermission(){
-        if(ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED&&
-                ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)!=PackageManager.PERMISSION_GRANTED&&
+        if(ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED||
+                ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)!=PackageManager.PERMISSION_GRANTED||
                 ActivityCompat.checkSelfPermission(this,Manifest.permission.WRITE_EXTERNAL_STORAGE)!=PackageManager.PERMISSION_GRANTED){
 
             if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION)||
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity{
             case PERMISSION_REQUEST:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     Toast.makeText(this, "권한 설정완료", Toast.LENGTH_SHORT).show();
-                    startSelectActivity();
+                    startFirstActivity();
 
                 } else {
                     Toast.makeText(this, "권한 취소됨", Toast.LENGTH_SHORT).show();
@@ -73,7 +74,7 @@ public class MainActivity extends AppCompatActivity{
                 break;
         }
     }
-    public void startSelectActivity(){
+    public void startFirstActivity(){
         Intent intent=new Intent(getApplicationContext(),FirstActivity.class);
         startActivity(intent);
         finish();

@@ -1,7 +1,5 @@
 package com.example.drawandwalk;
 
-import android.widget.TextView;
-
 public class DrawFiles {
     private String filename;
 

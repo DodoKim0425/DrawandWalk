@@ -1,12 +1,9 @@
 package com.example.drawandwalk;
 
 import android.Manifest;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
@@ -16,13 +13,10 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.NetworkRequest;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -42,15 +36,8 @@ import net.daum.mf.map.api.MapPoint;
 import net.daum.mf.map.api.MapPointBounds;
 import net.daum.mf.map.api.MapPolyline;
 import net.daum.mf.map.api.MapView;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -90,7 +77,6 @@ public class GpsDrawActivity extends AppCompatActivity {
         marker.setItemName("당신의 위치");
         marker.setTag(0);
         marker.setMarkerType(MapPOIItem.MarkerType.BluePin); // 기본으로 제공하는 BluePin 마커 모양.
-        //mapView.addPOIItem(marker);//마커를 지도위에 올린다
         manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         btnDrawStart = findViewById(R.id.btnDrawStart);
         tvTopic = findViewById(R.id.tvTopic);
@@ -109,7 +95,6 @@ public class GpsDrawActivity extends AppCompatActivity {
             tvTimeLimit.setText("제한시간: " + GPSIntent.getIntExtra("hour", 0) + "시간" + GPSIntent.getIntExtra("min", 0) + "분");
         }
 
-        //polyline.setLineColor(Color.argb(0, 255, 51, 0));
         if (permissonCheck != PackageManager.PERMISSION_GRANTED && c_permissonCheck != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
         } else {
@@ -207,12 +192,12 @@ public class GpsDrawActivity extends AppCompatActivity {
         Toast.makeText(this,message,Toast.LENGTH_SHORT).show();
     }
     public void GPSServiceStart(){//그림그리기위한 세팅 완료 이후
-            longitude=lastLocation.getLongitude();
-            latitude=lastLocation.getLatitude();//처음 위치 세팅
-            point=MapPoint.mapPointWithGeoCoord(latitude,longitude);//포인트
-            marker.setMapPoint(point);
-            mapView.addPOIItem(marker);//사용자 위치 표시하는 마커
-           mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude,longitude),true);//맵 중앙에 사용자 위치가 오도록
+        longitude=lastLocation.getLongitude();
+        latitude=lastLocation.getLatitude();//처음 위치 세팅
+        point=MapPoint.mapPointWithGeoCoord(latitude,longitude);//포인트
+        marker.setMapPoint(point);
+        mapView.addPOIItem(marker);//사용자 위치 표시하는 마커
+        mapView.setMapCenterPoint(MapPoint.mapPointWithGeoCoord(latitude,longitude),true);//맵 중앙에 사용자 위치가 오도록
         btnDrawStart.setOnClickListener(new View.OnClickListener() {//시작 버튼 클릭
             @Override
             public void onClick(View v) {

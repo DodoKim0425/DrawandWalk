@@ -11,12 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 public class DrawFilesAdapter extends RecyclerView.Adapter <DrawFilesViewHolder>{
@@ -64,7 +61,6 @@ public class DrawFilesAdapter extends RecyclerView.Adapter <DrawFilesViewHolder>
                 String[] Point=line.split(",");
                 Double latitude=Double.parseDouble(Point[0]);
                 Double longitude=Double.parseDouble(Point[1]);
-                System.out.println("--------========="+latitude+" "+longitude);
                 myDrawPoints.add(new DrawLocation(latitude,longitude));
             }
         } catch (FileNotFoundException e) {

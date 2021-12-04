@@ -155,18 +155,4 @@ public class SelectActivity extends AppCompatActivity {
         finish();
     }
 
-
-//    public boolean checkGPS() {
-//        LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-//        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-//
-//        }
-//        Location lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-//        if(lastLocation==null){
-//            return false;
-//        }else{
-//            return true;
-//        }
-//
-//    }
 }
