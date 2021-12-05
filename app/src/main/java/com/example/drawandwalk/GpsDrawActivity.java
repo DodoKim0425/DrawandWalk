@@ -92,8 +92,8 @@ public class GpsDrawActivity extends AppCompatActivity {
         locations=new ArrayList<DrawLocation>();
 
         Boolean timeLimit = GPSIntent.getBooleanExtra("timeLimit", false);
-        tvTopic.setText("그림 주제: " + GPSIntent.getStringExtra("topic"));
-        if (timeLimit == false) {
+        tvTopic.setText("그림 주제: " + GPSIntent.getStringExtra("topic"));//주제세팅
+        if (timeLimit == false) {//제한시간 세팅
             tvTimeLimit.setText("제한시간: 없음");
             tvHourLimit.setVisibility(View.GONE);
             tvMinLimit.setVisibility(View.GONE);
@@ -104,7 +104,7 @@ public class GpsDrawActivity extends AppCompatActivity {
             tvSecondLimit.setText("0 초");
         }
 
-        if (permissonCheck != PackageManager.PERMISSION_GRANTED && c_permissonCheck != PackageManager.PERMISSION_GRANTED) {
+        if (permissonCheck != PackageManager.PERMISSION_GRANTED && c_permissonCheck != PackageManager.PERMISSION_GRANTED) {//위치 퍼미션 체크
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 0);
         } else {
         }
@@ -151,9 +151,9 @@ public class GpsDrawActivity extends AppCompatActivity {
         showToast("GPS 위치 파악이 정확해질 때까지 시작하지 말고 기다려주세요..");
 
         if(manager.isProviderEnabled(manager.GPS_PROVIDER)==true){//gps사용 가능한 경우
-            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 1, locationListener);
+            manager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 100, 0, locationListener);
         }else{//아닌경우 네트워크로 위치 파악
-            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 1, locationListener);
+            manager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 100, 0, locationListener);
         }
 
         lastLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);//gps로 위치 잡는것을 우선시한다
@@ -216,7 +216,7 @@ public class GpsDrawActivity extends AppCompatActivity {
                 polyline.setLineColor(Color.argb(128,255,51,0));
                 chronometer.setBase(SystemClock.elapsedRealtime());
                 chronometer.start();
-                if(GPSIntent.getBooleanExtra("timeLimit",false)==true){
+                if(GPSIntent.getBooleanExtra("timeLimit",false)==true){//제한시간 기능
                     countDown();
                 }
             }

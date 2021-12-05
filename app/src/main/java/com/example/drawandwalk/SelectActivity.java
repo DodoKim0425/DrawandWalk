@@ -106,7 +106,7 @@ public class SelectActivity extends AppCompatActivity {
         });
     }
 
-    public boolean checkHour() {
+    public boolean checkHour() {//시간확인
         if (etHour.getText().toString().matches("")) {
             showToast("시간을 입력해 주세요");
             return false;
@@ -120,7 +120,7 @@ public class SelectActivity extends AppCompatActivity {
         return true;
     }
 
-    public boolean checkMin() {
+    public boolean checkMin() {//분 확인
         if (etMin.getText().toString().matches("")) {
             showToast("시간을 입력해 주세요");
             return false;
@@ -138,7 +138,7 @@ public class SelectActivity extends AppCompatActivity {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 
-    public void startGPS() {
+    public void startGPS() {//gps드로잉 화면 불러오기
         Intent intent = new Intent(this, GpsDrawActivity.class);
         intent.putExtra("topic", topic);
         intent.putExtra("hour", hour);

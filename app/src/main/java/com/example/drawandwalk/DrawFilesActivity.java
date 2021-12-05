@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DrawFilesActivity  extends AppCompatActivity {
+public class DrawFilesActivity  extends AppCompatActivity {//작품 감상화면
     private RecyclerView recyclerView;
     private DrawFilesAdapter adapter;
     private List<DrawFiles>filesNameList;
